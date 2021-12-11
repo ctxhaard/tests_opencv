@@ -35,11 +35,22 @@ def detect_faces(frame, face_cascade):
     Detects faces, wite a frame around them and return the number of detected faces.
     @see https://towardsdatascience.com/face-detection-in-2-minutes-using-opencv-python-90f89d7c0f81
     """
-    faces = face_cascade.detectMultiScale(frame, 1.1, 4)
-    for face in faces:
-        (fcx, fcy, fcw, fch) = face
+    faces = face_cascade.detectMultiScale(frame)
+    for item in faces:
+        (fcx, fcy, fcw, fch) = item
         cv2.rectangle(frame, (fcx, fcy), (fcx+fcw, fcy+fch), (255, 0, 0), 2)
     return len(faces)
+
+def detect_eyes(frame, eye_cascade):
+    """
+    """
+    eyes = eye_cascade.detectMultiScale(frame)
+    for item in eyes:
+        (fcx, fcy, fcw, fch) = item
+        center = (fcx + fcw//2, fcy + fch//2)
+        radius = fch//2
+        cv2.circle(frame, center, radius, (255, 0, 0), 2)
+    return len(eyes)
 
 def main(args):
     """
@@ -55,6 +66,7 @@ def main(args):
     f_h = int(vid_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    eye_cascade = cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml')
 
     vid_writer = cv2.VideoWriter(
         args.output,
@@ -79,6 +91,7 @@ def main(args):
             break
 
         n_faces = detect_faces(frame, face_cascade)
+        n_eyes = detect_eyes(frame, eye_cascade)
         add_label(frame, f"{f_w} x {f_h} {rate} fps")
         add_label(frame, f"cur: {cur} faces: {n_faces}", row=2)
         add_frame(frame, f_w, f_h, 60)
